@@ -1,5 +1,14 @@
 # Building NetflixGPT
 
+
+- Creat React App
+- Configured tailwindcss
+- Header
+- Routing of App
+- Login Form / Sign Up Form
+- Form Validation
+- useRef hook
+
 # Features
 
 - Login/Sign Up form
