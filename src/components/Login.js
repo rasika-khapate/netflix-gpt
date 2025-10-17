@@ -1,6 +1,11 @@
 import React, { useState, useRef } from "react";
 import Header from "./Header";
 import checkValidate from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
@@ -16,7 +21,43 @@ const Login = () => {
     // validate the form data
 
     const message = checkValidate(email.current.value, password.current.value);
+    // console.log(message);
     setErrorMessage(message);
+
+    if (message) return;
+
+    if (!isSignInForm) {
+      // If its not a sign in , then SIGN UP the user by using API
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCrdentials) => {
+          const user = userCrdentials.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(`${errorCode} - ${errorMessage}`);
+        });
+    } else {
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCrdentials) => {
+          const user = userCrdentials.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(`${errorCode} - ${errorMessage}`);
+        });
+    }
   };
 
   return (
@@ -50,7 +91,9 @@ const Login = () => {
           placeholder={isSignInForm ? "Password" : "Set up your password"}
           className="w-full p-4 my-3 rounded-lg bg-gray-800 bg-opacity-80"
         />
-        <p className="text-red-600 font-bold text-lg text-center">{errorMessage}</p>
+        <p className="text-red-600 font-bold text-lg text-center">
+          {errorMessage}
+        </p>
         <button
           className="w-full p-3 my-3 bg-red-600 rounded-lg"
           onClick={handleSignButtonClick}
