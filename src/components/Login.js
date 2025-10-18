@@ -4,14 +4,21 @@ import checkValidate from "../utils/validate";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../redux/userSlice";
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const email = useRef(null);
   const password = useRef(null);
+  const name = useRef(null);
 
   const handleSignInForm = () => {
     setSignInForm(!isSignInForm);
@@ -33,9 +40,30 @@ const Login = () => {
         email.current.value,
         password.current.value
       )
-        .then((userCrdentials) => {
-          const user = userCrdentials.user;
+        .then((userCredentials) => {
+          const user = userCredentials.user;
           console.log(user);
+
+          updateProfile(user, {
+            displayName: name.current.value,
+            photoURL:
+              "https://charts-static.billboard.com/img/2006/07/taylor-swift-vug-344x344.jpg",
+          })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
+              );
+              navigate("/browse");
+            })
+            .catch((error) => {
+              setErrorMessage(error.message);
+            });
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -48,9 +76,27 @@ const Login = () => {
         email.current.value,
         password.current.value
       )
-        .then((userCrdentials) => {
-          const user = userCrdentials.user;
+        .then((userCredentials) => {
+          const user = userCredentials.user;
           console.log(user);
+          updateProfile(user, {
+            photoURL:
+              "https://charts-static.billboard.com/img/2006/07/taylor-swift-vug-344x344.jpg",
+          })
+            .then(() => {
+              const { uid, email, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  photoURL: photoURL,
+                })
+              );
+              navigate("/browse");
+            })
+            .catch((error) => {
+              setErrorMessage(error.message);
+            });
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -73,6 +119,7 @@ const Login = () => {
 
         {!isSignInForm && (
           <input
+            ref={name}
             type="text"
             placeholder="Enter your name here"
             className="w-full p-4 my-3 rounded-lg bg-gray-800 bg-opacity-80"
